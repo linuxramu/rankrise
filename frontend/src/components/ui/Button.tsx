@@ -24,8 +24,8 @@ const sizes = {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({
-    variant = 'primary',
-    size = 'md',
+    variant = 'primary' as const,
+    size = 'md' as const,
     loading,
     className,
     children,
@@ -38,8 +38,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
-          variants[variant],
-          sizes[size],
+          variants[variant as keyof typeof variants],
+          sizes[size as keyof typeof sizes],
           className
         )}
         disabled={disabled || loading}
