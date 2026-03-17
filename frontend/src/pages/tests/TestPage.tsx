@@ -17,7 +17,7 @@ export function TestPage() {
 
   useEffect(() => {
     if (!testId) return
-    testService.startTest(testId).then(({ sessionId, questions }) => {
+    testService.startTest(testId).then(({ questions }) => {
       setSession({
         testId,
         questions,

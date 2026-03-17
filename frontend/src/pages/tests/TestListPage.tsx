@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { EXAM_LABELS } from '@/lib/utils'
-import type { Test, ExamType, TestType } from '@/types'
+import type { Test, ExamType } from '@/types'
 
 const EXAM_FILTERS: { label: string; value: ExamType | 'ALL' }[] = [
   { label: 'All', value: 'ALL' },
