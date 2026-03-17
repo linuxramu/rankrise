@@ -6,7 +6,6 @@
     "enabled": true
   },
   "assets": {
-    "directory": "./frontend/dist",
-    "binding": "ASSETS"
+    "directory": "./frontend/dist"
   }
 }
