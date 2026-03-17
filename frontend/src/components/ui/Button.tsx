@@ -6,6 +6,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   as?: ElementType
+  [key: string]: any
 }
 
 const variants = {
