@@ -10,6 +10,6 @@
     "command": "cd frontend && npm install && npm run build"
   },
   "assets": {
-    "directory": "./frontend/dist"
+    "directory": "frontend/dist"
   }
 }
