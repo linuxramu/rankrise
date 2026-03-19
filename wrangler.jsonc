@@ -11,5 +11,12 @@
   },
   "assets": {
     "directory": "frontend/dist"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rankrise",
+      "database_id": "2e7cc259-eb61-431d-8658-591e3d8d9340"
+    }
+  ]
 }
