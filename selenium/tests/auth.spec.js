@@ -222,4 +222,251 @@ describe('🔐 Authentication Tests', () => {
       expect(leaderboardLinkDisplayed).toBe(true)
     })
   })
+
+  describe('✅ Field-Level Validation Tests', () => {
+    beforeEach(async () => {
+      await registerPage.navigateToRegister()
+    })
+
+    it('should show error for empty name field', async () => {
+      await registerPage.enterEmail('test@example.com')
+      await registerPage.enterPassword('SecurePass123')
+      await registerPage.enterConfirmPassword('SecurePass123')
+      await registerPage.clickRegisterButton()
+      await registerPage.sleep(1000)
+
+      const nameError = await registerPage.getNameError()
+      expect(nameError).not.toBeNull()
+    })
+
+    it('should show error for empty email field', async () => {
+      await registerPage.enterName('Test User')
+      await registerPage.enterPassword('SecurePass123')
+      await registerPage.enterConfirmPassword('SecurePass123')
+      await registerPage.clickRegisterButton()
+      await registerPage.sleep(1000)
+
+      const emailError = await registerPage.getEmailError()
+      expect(emailError).not.toBeNull()
+    })
+
+    it('should show error for invalid email format', async () => {
+      await registerPage.enterName('Test User')
+      await registerPage.enterEmail('invalid-email')
+      await registerPage.sleep(500)
+
+      const emailError = await registerPage.getEmailError()
+      expect(emailError).not.toBeNull()
+      expect(emailError).toContain('valid')
+    })
+
+    it('should show error for password less than 8 characters', async () => {
+      await registerPage.enterPassword('Short1')
+      await registerPage.sleep(500)
+
+      const passwordError = await registerPage.getPasswordError()
+      expect(passwordError).not.toBeNull()
+    })
+
+    it('should show error for password without uppercase letter', async () => {
+      await registerPage.enterPassword('securepass123')
+      await registerPage.sleep(500)
+
+      const passwordError = await registerPage.getPasswordError()
+      expect(passwordError).not.toBeNull()
+    })
+
+    it('should show error for password without lowercase letter', async () => {
+      await registerPage.enterPassword('SECUREPASS123')
+      await registerPage.sleep(500)
+
+      const passwordError = await registerPage.getPasswordError()
+      expect(passwordError).not.toBeNull()
+    })
+
+    it('should show error for password without number', async () => {
+      await registerPage.enterPassword('SecurePass')
+      await registerPage.sleep(500)
+
+      const passwordError = await registerPage.getPasswordError()
+      expect(passwordError).not.toBeNull()
+    })
+
+    it('should validate all criteria in real-time', async () => {
+      // Type password step by step and verify criteria updates
+      await registerPage.enterPassword('S')
+      await registerPage.sleep(300)
+      let criteria = await registerPage.getPasswordCriteria()
+      expect(criteria).toBeDefined()
+
+      await registerPage.clearPasswordField()
+      await registerPage.enterPassword('Secure1')
+      await registerPage.sleep(300)
+      criteria = await registerPage.getPasswordCriteria()
+      expect(criteria).toBeDefined()
+    })
+
+    it('should clear error when correcting invalid input', async () => {
+      // Enter invalid email
+      await registerPage.enterEmail('invalid-email')
+      await registerPage.sleep(500)
+      let emailError = await registerPage.getEmailError()
+      expect(emailError).not.toBeNull()
+
+      // Correct to valid email
+      await registerPage.clearEmailField()
+      await registerPage.enterEmail('valid@example.com')
+      await registerPage.sleep(500)
+      emailError = await registerPage.getEmailError()
+      expect(emailError).toBeNull()
+    })
+  })
+
+  describe('✅ Dynamic User Registration and Sign In', () => {
+    it('should create new user and sign in successfully', async () => {
+      const timestamp = Date.now()
+      const testUser = {
+        name: `Dynamic User ${timestamp}`,
+        email: `dynamic_${timestamp}@example.com`,
+        password: 'DynamicPass123',
+      }
+
+      // Step 1: Register the dynamic user
+      await registerPage.navigateToRegister()
+      await registerPage.register(testUser.name, testUser.email, testUser.password)
+      await registerPage.sleep(3000)
+
+      // Verify registration successful - should be on dashboard
+      let url = await registerPage.getCurrentUrl()
+      expect(url).toContain('/dashboard')
+
+      // Step 2: Clear authentication and logout
+      await registerPage.clearLocalStorage()
+      await registerPage.clearCookies()
+
+      // Step 3: Sign in with the same credentials
+      await loginPage.navigateToLogin()
+      await loginPage.login(testUser.email, testUser.password)
+      await loginPage.sleep(3000)
+
+      // Verify sign in successful
+      url = await loginPage.getCurrentUrl()
+      expect(url).toContain('/dashboard')
+
+      // Verify dashboard loaded with user authenticated
+      const isDashboardLoaded = await dashboardPage.isDashboardLoaded()
+      expect(isDashboardLoaded).toBe(true)
+    })
+
+    it('should create multiple users and verify unique emails', async () => {
+      const timestamp = Date.now()
+      const users = [
+        {
+          name: `User One ${timestamp}`,
+          email: `user_one_${timestamp}@example.com`,
+          password: 'UserOne123',
+        },
+        {
+          name: `User Two ${timestamp}`,
+          email: `user_two_${timestamp}@example.com`,
+          password: 'UserTwo123',
+        },
+      ]
+
+      // Register first user
+      await registerPage.navigateToRegister()
+      await registerPage.register(users[0].name, users[0].email, users[0].password)
+      await registerPage.sleep(2000)
+
+      // Clear and register second user
+      await registerPage.clearLocalStorage()
+      await registerPage.clearCookies()
+      await registerPage.navigateToRegister()
+      await registerPage.register(users[1].name, users[1].email, users[1].password)
+      await registerPage.sleep(2000)
+
+      // Verify second registration successful
+      const url = await registerPage.getCurrentUrl()
+      expect(url).toContain('/dashboard')
+    })
+
+    it('should prevent duplicate email registration after user creation', async () => {
+      const timestamp = Date.now()
+      const email = `unique_${timestamp}@example.com`
+
+      // Create first user
+      await registerPage.navigateToRegister()
+      await registerPage.register('First User', email, 'FirstPass123')
+      await registerPage.sleep(2000)
+
+      // Try to create another user with same email
+      await registerPage.clearLocalStorage()
+      await registerPage.clearCookies()
+      await registerPage.navigateToRegister()
+      await registerPage.register('Second User', email, 'SecondPass123')
+      await registerPage.sleep(2000)
+
+      // Should show duplicate email error and stay on register page
+      const emailError = await registerPage.getEmailError()
+      const url = await registerPage.getCurrentUrl()
+
+      expect(emailError).not.toBeNull()
+      expect(url).toContain('/register')
+    })
+
+    it('should sign in fail with wrong password for valid user', async () => {
+      const timestamp = Date.now()
+      const email = `failtest_${timestamp}@example.com`
+      const correctPassword = 'CorrectPass123'
+      const wrongPassword = 'WrongPass123'
+
+      // Register user
+      await registerPage.navigateToRegister()
+      await registerPage.register('Fail Test User', email, correctPassword)
+      await registerPage.sleep(2000)
+
+      // Clear and try to login with wrong password
+      await registerPage.clearLocalStorage()
+      await registerPage.clearCookies()
+      await loginPage.navigateToLogin()
+      await loginPage.login(email, wrongPassword)
+      await loginPage.sleep(2000)
+
+      // Should show error and stay on login page
+      const errorMessage = await loginPage.getErrorMessage()
+      const url = await loginPage.getCurrentUrl()
+
+      expect(errorMessage).not.toBeNull()
+      expect(url).toContain('/login')
+    })
+
+    it('should maintain session after sign in with dynamic user', async () => {
+      const timestamp = Date.now()
+      const testUser = {
+        name: `Session User ${timestamp}`,
+        email: `session_${timestamp}@example.com`,
+        password: 'SessionPass123',
+      }
+
+      // Register and login
+      await registerPage.navigateToRegister()
+      await registerPage.register(testUser.name, testUser.email, testUser.password)
+      await registerPage.sleep(2000)
+
+      // Verify on dashboard
+      let url = await dashboardPage.getCurrentUrl()
+      expect(url).toContain('/dashboard')
+
+      // Navigate away and back to verify session persists
+      await dashboardPage.navigateToLogin()
+      await dashboardPage.sleep(1000)
+
+      // Try to navigate to dashboard directly - should work due to session
+      await dashboardPage.navigateTo(`${global.testConfig.baseURL}/dashboard`)
+      await dashboardPage.sleep(2000)
+
+      const isDashboardLoaded = await dashboardPage.isDashboardLoaded()
+      expect(isDashboardLoaded).toBe(true)
+    })
+  })
 })

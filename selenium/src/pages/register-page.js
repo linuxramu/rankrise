@@ -76,6 +76,13 @@ export class RegisterPage extends BasePage {
   }
 
   /**
+   * Click register button (alias)
+   */
+  async clickRegisterButton() {
+    await this.clickCreateAccount()
+  }
+
+  /**
    * Register with full details
    */
   async register(name, email, password, exam = 'JEE_MAINS') {
@@ -85,6 +92,16 @@ export class RegisterPage extends BasePage {
     await this.enterConfirmPassword(password)
     await this.selectTargetExam(exam)
     await this.clickCreateAccount()
+  }
+
+  /**
+   * Get name error message
+   */
+  async getNameError() {
+    if (await this.isDisplayed(this.nameError)) {
+      return await this.getText(this.nameError)
+    }
+    return null
   }
 
   /**
@@ -113,6 +130,33 @@ export class RegisterPage extends BasePage {
   async getConfirmPasswordError() {
     if (await this.isDisplayed(this.confirmPasswordError)) {
       return await this.getText(this.confirmPasswordError)
+    }
+    return null
+  }
+
+  /**
+   * Clear password field
+   */
+  async clearPasswordField() {
+    const element = await this.findElement(this.passwordInput)
+    // Select all and delete
+    await element.clear()
+  }
+
+  /**
+   * Clear email field
+   */
+  async clearEmailField() {
+    const element = await this.findElement(this.emailInput)
+    await element.clear()
+  }
+
+  /**
+   * Get password criteria object
+   */
+  async getPasswordCriteria() {
+    if (await this.isDisplayed(this.passwordCriteria)) {
+      return await this.getText(this.passwordCriteria)
     }
     return null
   }

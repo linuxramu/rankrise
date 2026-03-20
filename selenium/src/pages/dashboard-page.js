@@ -22,6 +22,20 @@ export class DashboardPage extends BasePage {
   }
 
   /**
+   * Navigate to any URL
+   */
+  async navigateTo(url) {
+    await this.driver.get(url)
+  }
+
+  /**
+   * Navigate to login page
+   */
+  async navigateToLogin() {
+    await this.navigate(`${global.testConfig.baseURL}/login`)
+  }
+
+  /**
    * Is dashboard loaded
    */
   async isDashboardLoaded() {
