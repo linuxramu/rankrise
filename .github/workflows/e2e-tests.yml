@@ -1,0 +1,149 @@
+name: 🧪 Selenium E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'selenium/**'
+      - '.github/workflows/e2e-tests.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'selenium/**'
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  TEST_BASE_URL: https://rankrise-frontend.pages.dev
+  HEADLESS: true
+
+jobs:
+  e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'selenium/package-lock.json'
+
+      - name: 🔧 Install Chrome
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: latest
+
+      - name: 🔧 Install ChromeDriver
+        uses: nanasess/setup-chromedriver@master
+
+      - name: 📦 Install Dependencies
+        working-directory: selenium
+        run: npm install
+
+      - name: 🧪 Run Smoke Tests
+        working-directory: selenium
+        run: npm run test tests/smoke.spec.js
+
+      - name: 🔐 Run Auth Tests
+        working-directory: selenium
+        run: npm run test tests/auth.spec.js
+        continue-on-error: true
+
+      - name: 📊 Generate Allure Report
+        working-directory: selenium
+        if: always()
+        run: |
+          npm install -g allure-commandline --save-dev
+          allure generate allure-results --clean -o allure-report
+
+      - name: 📤 Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: selenium/allure-report
+          retention-days: 30
+
+      - name: 📤 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: selenium/allure-results
+          retention-days: 30
+
+      - name: 📝 Create Test Summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'selenium/allure-results';
+            
+            if (fs.existsSync(path)) {
+              const files = fs.readdirSync(path);
+              const testCount = files.length;
+              console.log(`✅ Tests completed. Results: ${testCount} test files generated`);
+            }
+
+      - name: 🔔 Comment PR with Results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ E2E Tests completed! Download the Allure Report from artifacts to view detailed test results.'
+            })
+
+  publish-report:
+    name: 📊 Publish Report to GitHub Pages
+    runs-on: ubuntu-latest
+    if: always()
+    needs: e2e-tests
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: 📥 Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: 📤 Setup Pages
+        uses: actions/configure-pages@v3
+        if: github.ref == 'refs/heads/main'
+
+      - name: 📤 Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: 'allure-report'
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+        if: github.ref == 'refs/heads/main'
+
+      - name: ✅ Deployment Info
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "📊 Allure Report deployed to: ${{ steps.deployment.outputs.page_url }}"
