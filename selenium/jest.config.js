@@ -4,6 +4,12 @@ export default {
   collectCoverageFrom: ['tests/**/*.spec.js'],
   testTimeout: 120000,
   maxWorkers: 1,
+  extensionsToTreatAsEsm: ['.js'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  transform: {},
+  transformIgnorePatterns: ['node_modules/'],
   reporters: [
     'default',
     [
