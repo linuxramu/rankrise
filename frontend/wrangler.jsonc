@@ -1,0 +1,9 @@
+{
+  "name": "rankrise-frontend",
+  "pages_build_output_dir": "dist",
+  "env": {
+    "production": {
+      "name": "rankrise-frontend-production"
+    }
+  }
+}

@@ -1,0 +1,405 @@
+{
+  "info": {
+    "_postman_id": "rankrise-api-production",
+    "name": "RankRise API - Production",
+    "description": "RankRise Backend API (Cloudflare Workers) - Production/Remote",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/health",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Check if the API is running on production"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"prod-student@example.com\",\n  \"password\": \"SecurePass123\",\n  \"name\": \"John Doe\",\n  \"targetExam\": \"JEE_MAINS\"\n}"
+            },
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/auth/register",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user account on production"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"prod-student@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/auth/login",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password on production"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tests",
+      "item": [
+        {
+          "name": "List Tests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/tests",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "tests"
+              ]
+            },
+            "description": "Get list of all tests from production"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Test",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/tests/{{test_id}}",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "tests",
+                "{{test_id}}"
+              ]
+            },
+            "description": "Get details of a specific test from production"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login (admin only)"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"JEE Main - Full Length Test 1\",\n  \"examId\": \"exam_jee_mains\",\n  \"type\": \"FULL_LENGTH\",\n  \"durationMinutes\": 180,\n  \"totalQuestions\": 90,\n  \"totalMarks\": 300\n}"
+            },
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/tests",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "tests"
+              ]
+            },
+            "description": "Create a new test on production (admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Results",
+      "item": [
+        {
+          "name": "List Results",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/results",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "results"
+              ]
+            },
+            "description": "Get user's test results from production"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Result",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/results/{{result_id}}",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "results",
+                "{{result_id}}"
+              ]
+            },
+            "description": "Get details of a specific result from production"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Test Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"testId\": \"test_123\",\n  \"attemptId\": \"attempt_123\",\n  \"score\": 250,\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"answerIndex\": 2,\n      \"timeSpent\": 45\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/results",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "results"
+              ]
+            },
+            "description": "Submit test result after completion on production"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/analytics",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "analytics"
+              ]
+            },
+            "description": "Get user's analytics and statistics from production"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{production_token}}",
+                "description": "JWT token from production login"
+              }
+            ],
+            "url": {
+              "raw": "https://rankrise-backend.ramuoncloud.workers.dev/api/analytics/leaderboard?exam=JEE_MAINS&limit=100",
+              "protocol": "https",
+              "host": [
+                "rankrise-backend",
+                "ramuoncloud",
+                "workers",
+                "dev"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "leaderboard"
+              ],
+              "query": [
+                {
+                  "key": "exam",
+                  "value": "JEE_MAINS"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get leaderboard for a specific exam from production"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "production_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token from production login - Copy from login response and paste here"
+    },
+    {
+      "key": "test_id",
+      "value": "",
+      "type": "string",
+      "description": "Test ID for specific test queries"
+    },
+    {
+      "key": "result_id",
+      "value": "",
+      "type": "string",
+      "description": "Result ID for specific result queries"
+    }
+  ]
+}

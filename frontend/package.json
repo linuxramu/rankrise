@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext ts,tsx"
+    "lint": "eslint src --ext ts,tsx",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name rankrise-frontend",
+    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name rankrise-frontend --branch production"
   },
   "dependencies": {
     "react": "^18.2.0",

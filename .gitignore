@@ -4,3 +4,7 @@
 !.dev.vars.example
 .env*
 !.env.example
+
+# postman collection
+/Users/ramu/code-ramu/rankrise/backend/RankRise-API.postman_collection.json
+/Users/ramu/code-ramu/rankrise/backend/RankRise-API.postman_collection.jsonbackend/RankRise-API.postman_collection.json

@@ -1,0 +1,367 @@
+{
+  "info": {
+    "_postman_id": "rankrise-api-collection",
+    "name": "RankRise API",
+    "description": "RankRise Backend API - Registration, Login, Tests, Results, Analytics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Check if the API is running"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\",\n  \"name\": \"John Doe\",\n  \"targetExam\": \"JEE_MAINS\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tests",
+      "item": [
+        {
+          "name": "List Tests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tests",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tests"
+              ]
+            },
+            "description": "Get list of all tests"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Test",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tests/{{test_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tests",
+                "{{test_id}}"
+              ]
+            },
+            "description": "Get details of a specific test"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login (admin only)"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"JEE Main - Full Length Test 1\",\n  \"examId\": \"exam_jee_mains\",\n  \"type\": \"FULL_LENGTH\",\n  \"durationMinutes\": 180,\n  \"totalQuestions\": 90,\n  \"totalMarks\": 300\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tests",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "tests"
+              ]
+            },
+            "description": "Create a new test (admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Results",
+      "item": [
+        {
+          "name": "List Results",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/results",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "results"
+              ]
+            },
+            "description": "Get user's test results"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Result",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/results/{{result_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "results",
+                "{{result_id}}"
+              ]
+            },
+            "description": "Get details of a specific result"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Test Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"testId\": \"test_123\",\n  \"attemptId\": \"attempt_123\",\n  \"score\": 250,\n  \"answers\": [\n    {\n      \"questionId\": \"q1\",\n      \"answerIndex\": 2,\n      \"timeSpent\": 45\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/results",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "results"
+              ]
+            },
+            "description": "Submit test result after completion"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics"
+              ]
+            },
+            "description": "Get user's analytics and statistics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/leaderboard?exam=JEE_MAINS&limit=100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "leaderboard"
+              ],
+              "query": [
+                {
+                  "key": "exam",
+                  "value": "JEE_MAINS"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get leaderboard for a specific exam"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8787",
+      "type": "string",
+      "description": "Base URL - Change to https://rankrise-backend.ramuoncloud.workers.dev for production"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token from login - Copy from login response and paste here"
+    },
+    {
+      "key": "test_id",
+      "value": "",
+      "type": "string",
+      "description": "Test ID for specific test queries"
+    },
+    {
+      "key": "result_id",
+      "value": "",
+      "type": "string",
+      "description": "Result ID for specific result queries"
+    }
+  ]
+}

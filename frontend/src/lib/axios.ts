@@ -1,7 +1,17 @@
 import axios from 'axios'
 
+// Determine API base URL based on environment
+const getApiBaseURL = () => {
+  // Production deployment (Cloudflare Pages)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://rankrise-backend.ramuoncloud.workers.dev/api'
+  }
+  // Development
+  return 'http://localhost:8787/api'
+}
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: getApiBaseURL(),
   headers: { 'Content-Type': 'application/json' },
 })
 
