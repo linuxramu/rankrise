@@ -7,13 +7,10 @@ module.exports = {
   reporters: [
     'default',
     [
-      'jest-allure2-adapter',
+      'jest-allure',
       {
-        resultsDir: 'allure-results',
-        config: {
-          host: 'localhost',
-          port: 4444,
-        },
+        outputDir: 'allure-results',
+        usePackageJsonName: true,
       },
     ],
   ],
