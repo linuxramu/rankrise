@@ -2,7 +2,7 @@ import { Router } from 'itty-router'
 import { Env, AuthResponse, User } from './src/types/index'
 import { hashPassword, createToken } from './src/utils/auth'
 import { validateRegistration } from './src/utils/validation'
-import { successResponse, errorResponse, validationErrorResponse, ConflictError, parseJsonBody, InternalServerError } from './src/utils/errors'
+import { successResponse, errorResponse, validationErrorResponse, ConflictError, parseJsonBody, InternalServerError, UnauthorizedError } from './src/utils/errors'
 import { userExistsByEmail, createUser, getUserByEmail, updateUserLastLogin, getUserPasswordHash } from './src/db/users'
 import { verifyPassword } from './src/utils/auth'
 
@@ -129,18 +129,18 @@ router.post('/api/auth/login', async (request: Request, env: Env) => {
     // Get user by email
     const user = await getUserByEmail(env.DB, email)
     if (!user) {
-      return errorResponse(new Error('Invalid email or password'))
+      return errorResponse(new UnauthorizedError('Invalid email or password'))
     }
 
     // Get password hash and verify
     const passwordHash = await getUserPasswordHash(env.DB, email)
     if (!passwordHash) {
-      return errorResponse(new Error('Invalid email or password'))
+      return errorResponse(new UnauthorizedError('Invalid email or password'))
     }
 
     const isPasswordValid = await verifyPassword(password, passwordHash)
     if (!isPasswordValid) {
-      return errorResponse(new Error('Invalid email or password'))
+      return errorResponse(new UnauthorizedError('Invalid email or password'))
     }
 
     // Create JWT token
