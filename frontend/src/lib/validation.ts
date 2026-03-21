@@ -153,6 +153,8 @@ export interface ApiErrorResponse {
 export function parseApiErrors(error: unknown): FieldErrors {
   const fieldErrors: FieldErrors = {}
 
+  console.log('parseApiErrors input:', error) // Debug
+  
   if (error && typeof error === 'object') {
     const apiError = error as any
 
@@ -165,26 +167,32 @@ export function parseApiErrors(error: unknown): FieldErrors {
     }
 
     // Handle specific status codes with user-friendly messages
-    if (apiError.response?.status === 409 && apiError.response?.data?.error?.message) {
+    const status = apiError.response?.status || apiError.status
+    console.log('Error status:', status) // Debug
+    
+    if (status === 409 && apiError.response?.data?.error?.message) {
       // Conflict error - typically email already exists
       fieldErrors.email = [apiError.response.data.error.message]
-    } else if (apiError.response?.status === 401 || apiError.response?.status === 403) {
-      // Unauthorized or forbidden
-      fieldErrors.credentials = ['Invalid email or password. Please try again.']
-    } else if (apiError.response?.status === 400 && apiError.response?.data?.error?.message) {
+    } else if (status === 401 || status === 403) {
+      // Unauthorized or forbidden - show generic credentials error
+      const message = apiError.response?.data?.error?.message || 'Invalid email or password. Please try again.'
+      fieldErrors.credentials = [message]
+      console.log('Setting credentials error:', message) // Debug
+    } else if (status === 400 && apiError.response?.data?.error?.message) {
       // Bad request - show the message without status code
       fieldErrors.api = [apiError.response.data.error.message]
-    } else if (apiError.response?.status && apiError.response?.status >= 500) {
+    } else if (status && status >= 500) {
       // Server error - don't expose details
       fieldErrors.api = ['Something went wrong. Please try again later.']
     } else if (apiError.message && !apiError.message.includes('status code')) {
       // Non-status code error messages
       fieldErrors.api = [apiError.message]
-    } else if (apiError.message) {
-      // Generic error
+    } else if (!fieldErrors.credentials && !fieldErrors.api && !fieldErrors.email) {
+      // Generic error fallback
       fieldErrors.api = ['An error occurred. Please try again.']
     }
   }
 
+  console.log('Parsed field errors:', fieldErrors) // Debug
   return fieldErrors
 }

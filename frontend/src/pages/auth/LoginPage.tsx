@@ -55,8 +55,11 @@ export function LoginPage() {
       await login(form)
       navigate('/dashboard')
     } catch (error) {
+      console.error('Login error:', error) // Debug log
       // Parse API errors
       const apiErrors = parseApiErrors(error)
+      console.log('Parsed errors:', apiErrors) // Debug log
+      
       if (Object.keys(apiErrors).length === 0) {
         // If no specific field errors, show general error
         setFieldErrors({
