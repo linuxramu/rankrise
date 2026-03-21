@@ -22,13 +22,18 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle 401 globally — redirect to login
+// Handle 401 globally — redirect to login (except for auth endpoints)
 api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      // Don't redirect if this is an auth endpoint (login/register) 
+      // Let those handle the error and show message to user
+      const url = error.config?.url || ''
+      if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
