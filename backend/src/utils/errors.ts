@@ -61,12 +61,10 @@ export class InternalServerError extends AppError {
 }
 
 // ─── Response Builders ────────────────────────────────────────────────────
+// Note: CORS headers are added in worker.ts based on request origin
 
-const corsHeaders = {
+const baseHeaders = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 export function successResponse<T>(data: T, statusCode = 200): Response {
@@ -76,7 +74,7 @@ export function successResponse<T>(data: T, statusCode = 200): Response {
   }
   return new Response(JSON.stringify(response), {
     status: statusCode,
-    headers: corsHeaders,
+    headers: baseHeaders,
   })
 }
 
@@ -106,7 +104,7 @@ export function errorResponse(error: AppError | Error): Response {
 
   return new Response(JSON.stringify(response), {
     status: statusCode,
-    headers: corsHeaders,
+    headers: baseHeaders,
   })
 }
 

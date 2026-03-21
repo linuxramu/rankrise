@@ -9,21 +9,38 @@ import { verifyPassword } from './src/utils/auth'
 const router = Router<{ Bindings: Env }>()
 
 // ============================================================================
-// CORS HEADERS
+// CORS CONFIGURATION
 // ============================================================================
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Content-Type': 'application/json',
+// Allowed frontend origins
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',      // Local development
+  'http://127.0.0.1:5173',      // Local development (alternative)
+  'https://rankrise-frontend.pages.dev',  // Production frontend
+]
+
+/**
+ * Get CORS headers based on request origin
+ * Only allows specific frontend origins
+ */
+function getCorsHeaders(origin?: string): Record<string, string> {
+  const isOriginAllowed = origin && ALLOWED_ORIGINS.includes(origin)
+  
+  return {
+    'Access-Control-Allow-Origin': isOriginAllowed ? origin : 'null',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+    'Content-Type': 'application/json',
+  }
 }
 
 // Handle CORS preflight requests
-router.options('*', () => {
+router.options('*', (request: Request) => {
+  const origin = request.headers.get('origin') || undefined
   return new Response(null, {
     status: 204,
-    headers: corsHeaders,
+    headers: getCorsHeaders(origin),
   })
 })
 
@@ -288,6 +305,18 @@ router.all('*', () => {
 
 export default {
   fetch: async (request: Request, env: Env): Promise<Response> => {
-    return router.handle(request, env)
+    const response = await router.handle(request, env)
+    
+    // Add CORS headers to all responses
+    const origin = request.headers.get('origin') || undefined
+    const corsHeaders = getCorsHeaders(origin)
+    
+    // Clone response and add CORS headers
+    const newResponse = new Response(response.body, response)
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      newResponse.headers.set(key, value)
+    })
+    
+    return newResponse
   },
 }
