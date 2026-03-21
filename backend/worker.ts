@@ -17,6 +17,7 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',      // Local development
   'http://127.0.0.1:5173',      // Local development (alternative)
   'https://rankrise-frontend.pages.dev',  // Production frontend
+  'https://rankrise.gurrapu.org',  // Custom domain
 ]
 
 /**
