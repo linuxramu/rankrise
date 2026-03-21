@@ -8,7 +8,7 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   login: (payload: LoginPayload) => Promise<void>
-  register: (payload: RegisterPayload) => Promise<void>
+  register: (payload: RegisterPayload) => Promise<any>
   logout: () => Promise<void>
   setUser: (user: User) => void
 }
@@ -27,9 +27,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       register: async (payload) => {
-        const { token, user } = await authService.register(payload)
-        localStorage.setItem('token', token)
-        set({ user, token, isAuthenticated: true })
+        const response = await authService.register(payload)
+        localStorage.setItem('token', response.token)
+        set({ user: response.user, token: response.token, isAuthenticated: true })
+        return response
       },
 
       logout: async () => {

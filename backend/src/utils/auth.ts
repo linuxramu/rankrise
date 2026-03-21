@@ -238,3 +238,13 @@ export function generateId(prefix: string = ''): string {
   const randomStr = Math.random().toString(36).substring(2, 9)
   return prefix ? `${prefix}_${timestamp}${randomStr}` : `${timestamp}${randomStr}`
 }
+/**
+ * Generate email verification token
+ * Returns a random 32-character token
+ */
+export function generateVerificationToken(): string {
+  // Generate 24 random bytes and convert to hex (48 chars), then take first 32
+  const array = new Uint8Array(24)
+  crypto.getRandomValues(array)
+  return bufferToHex(array).substring(0, 32)
+}

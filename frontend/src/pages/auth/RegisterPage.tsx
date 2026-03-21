@@ -22,6 +22,12 @@ interface FormData {
   targetExam: string
 }
 
+interface VerificationState {
+  showVerification: boolean
+  email: string
+  verificationToken?: string
+}
+
 export function RegisterPage() {
   const register = useAuthStore((s) => s.register)
   const navigate = useNavigate()
@@ -34,6 +40,10 @@ export function RegisterPage() {
   })
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(false)
+  const [verification, setVerification] = useState<VerificationState>({
+    showVerification: false,
+    email: '',
+  })
 
   // Real-time password validation
   const passwordValidation = useMemo(() => {
@@ -66,13 +76,19 @@ export function RegisterPage() {
 
     setLoading(true)
     try {
-      await register({
+      const response = await register({
         name: form.name,
         email: form.email,
         password: form.password,
         targetExam: form.targetExam,
       })
-      navigate('/dashboard')
+      
+      // Show verification message instead of redirecting
+      setVerification({
+        showVerification: true,
+        email: form.email,
+        verificationToken: (response as any)?.verificationToken,
+      })
     } catch (error) {
       // Parse API errors and display them
       const apiErrors = parseApiErrors(error)
@@ -80,6 +96,47 @@ export function RegisterPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const generalError = fieldErrors.api ? fieldErrors.api[0] : null
+
+  // Show verification message
+  if (verification.showVerification) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
+        <Card className="w-full max-w-md text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mx-auto">
+            <span className="text-xl">✓</span>
+          </div>
+          <h1 className="mb-2 text-2xl font-bold text-gray-900">Check your email</h1>
+          <p className="mb-6 text-sm text-gray-600">
+            We've sent a verification link to <span className="font-medium">{verification.email}</span>
+          </p>
+          
+          {verification.verificationToken && (
+            <div className="mb-6 rounded-lg bg-blue-50 p-4">
+              <p className="text-xs text-blue-700 mb-2">For testing (dev only):</p>
+              <code className="text-xs font-mono text-blue-600 break-all">{verification.verificationToken}</code>
+            </div>
+          )}
+
+          <p className="mb-4 text-sm text-gray-600">
+            Click the link in your email to verify your account. If you don't see the email, check your spam folder.
+          </p>
+
+          <Button
+            onClick={() => navigate('/login')}
+            className="w-full"
+          >
+            Go to Login
+          </Button>
+
+          <p className="mt-4 text-center text-xs text-gray-500">
+            After verifying your email, you can sign in with your credentials.
+          </p>
+        </Card>
+      </div>
+    )
   }
 
   const generalError = fieldErrors.api ? fieldErrors.api[0] : null

@@ -24,8 +24,8 @@ export const authService = {
     return response.data.data
   },
 
-  register: async (payload: RegisterPayload): Promise<AuthResponse> => {
-    const response = await api.post<{ success: boolean; data: AuthResponse }>('/auth/register', payload)
+  register: async (payload: RegisterPayload): Promise<AuthResponse & { verificationToken?: string }> => {
+    const response = await api.post<{ success: boolean; data: AuthResponse & { verificationToken?: string } }>('/auth/register', payload)
     return response.data.data
   },
 

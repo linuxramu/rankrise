@@ -1,9 +1,9 @@
 import { Router } from 'itty-router'
 import { Env, AuthResponse, User } from './src/types/index'
-import { hashPassword, createToken } from './src/utils/auth'
+import { hashPassword, createToken, generateVerificationToken } from './src/utils/auth'
 import { validateRegistration } from './src/utils/validation'
 import { successResponse, errorResponse, validationErrorResponse, ConflictError, parseJsonBody, InternalServerError, UnauthorizedError } from './src/utils/errors'
-import { userExistsByEmail, createUser, getUserByEmail, updateUserLastLogin, getUserPasswordHash } from './src/db/users'
+import { userExistsByEmail, createUser, getUserByEmail, getUserById, updateUserLastLogin, getUserPasswordHash, verifyUserEmail, storeVerificationToken, getVerificationToken, deleteVerificationToken } from './src/db/users'
 import { verifyPassword } from './src/utils/auth'
 
 const router = Router<{ Bindings: Env }>()
@@ -70,10 +70,15 @@ router.post('/api/auth/register', async (request: Request, env: Env) => {
     // Hash password
     const passwordHash = await hashPassword(password)
 
-    // Create user
+    // Create user (with email_verified = 0)
     const user = await createUser(env.DB, email, passwordHash, name, targetExam)
 
-    // Create JWT token
+    // Generate verification token (valid for 24 hours)
+    const verificationToken = generateVerificationToken()
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    await storeVerificationToken(env.DB, user.id, verificationToken, expiresAt)
+
+    // Create JWT token (can be used, but features may be limited until verified)
     const token = await createToken(
       {
         userId: user.id,
@@ -85,10 +90,11 @@ router.post('/api/auth/register', async (request: Request, env: Env) => {
     // Update last login
     await updateUserLastLogin(env.DB, user.id)
 
-    // Return success response
-    const response: AuthResponse = {
+    // Return success response with verification token (for dev/testing)
+    const response: AuthResponse & { verificationToken?: string } = {
       token,
       user,
+      verificationToken, // Include token in response for development
     }
 
     return successResponse(response, 201)
@@ -143,6 +149,11 @@ router.post('/api/auth/login', async (request: Request, env: Env) => {
       return errorResponse(new UnauthorizedError('Invalid email or password'))
     }
 
+    // Check if email is verified
+    if (!user.emailVerified) {
+      return errorResponse(new UnauthorizedError('Please verify your email before logging in'))
+    }
+
     // Create JWT token
     const token = await createToken(
       {
@@ -164,6 +175,54 @@ router.post('/api/auth/login', async (request: Request, env: Env) => {
     return successResponse(response)
   } catch (error) {
     console.error('[Login Error]', error)
+    if (error instanceof Error) {
+      return errorResponse(error)
+    }
+    return errorResponse(new InternalServerError())
+  }
+})
+
+/**
+ * POST /api/auth/verify-email
+ * Verify user email with token
+ */
+router.post('/api/auth/verify-email', async (request: Request, env: Env) => {
+  try {
+    // Parse request body
+    const body = await parseJsonBody(request)
+
+    if (!body || typeof body !== 'object') {
+      return validationErrorResponse([{ field: 'body', message: 'Invalid request body' }])
+    }
+
+    const data = body as Record<string, unknown>
+    const token = data.token as string
+
+    if (!token) {
+      return validationErrorResponse([{ field: 'token', message: 'Verification token is required' }])
+    }
+
+    // Get verification token
+    const tokenRecord = await getVerificationToken(env.DB, token)
+    if (!tokenRecord) {
+      return errorResponse(new UnauthorizedError('Invalid or expired verification token'))
+    }
+
+    // Mark email as verified
+    await verifyUserEmail(env.DB, tokenRecord.userId)
+
+    // Delete used token
+    await deleteVerificationToken(env.DB, token)
+
+    // Get updated user
+    const user = await getUserById(env.DB, tokenRecord.userId)
+    if (!user) {
+      return errorResponse(new InternalServerError('User not found'))
+    }
+
+    return successResponse({ success: true, message: 'Email verified successfully', user })
+  } catch (error) {
+    console.error('[Verify Email Error]', error)
     if (error instanceof Error) {
       return errorResponse(error)
     }

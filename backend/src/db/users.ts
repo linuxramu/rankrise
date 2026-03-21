@@ -123,6 +123,90 @@ export async function updateUserLastLogin(db: D1Database, userId: string): Promi
   }
 }
 
+/**
+ * Mark email as verified
+ */
+export async function verifyUserEmail(db: D1Database, userId: string): Promise<void> {
+  try {
+    const now = new Date().toISOString()
+    await db
+      .prepare('UPDATE users SET email_verified = 1, updated_at = ? WHERE id = ?')
+      .bind(now, userId)
+      .run()
+  } catch (error) {
+    console.error('Error verifying email:', error)
+    throw error
+  }
+}
+
+/**
+ * Store email verification token
+ */
+export async function storeVerificationToken(
+  db: D1Database,
+  userId: string,
+  token: string,
+  expiresAt: string
+): Promise<void> {
+  try {
+    const now = new Date().toISOString()
+    const id = generateId('token')
+    
+    await db
+      .prepare(
+        `INSERT INTO email_verification_tokens (id, user_id, token, expires_at, created_at)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .bind(id, userId, token, expiresAt, now)
+      .run()
+  } catch (error) {
+    console.error('Error storing verification token:', error)
+    throw error
+  }
+}
+
+/**
+ * Get verification token
+ */
+export async function getVerificationToken(
+  db: D1Database,
+  token: string
+): Promise<{ userId: string } | null> {
+  try {
+    const result = (await db
+      .prepare(
+        `SELECT user_id, expires_at FROM email_verification_tokens 
+         WHERE token = ? AND expires_at > datetime('now') LIMIT 1`
+      )
+      .bind(token)
+      .first()) as Record<string, unknown> | undefined
+
+    if (!result) {
+      return null
+    }
+
+    return { userId: result.user_id as string }
+  } catch (error) {
+    console.error('Error getting verification token:', error)
+    throw error
+  }
+}
+
+/**
+ * Delete verification token
+ */
+export async function deleteVerificationToken(db: D1Database, token: string): Promise<void> {
+  try {
+    await db
+      .prepare('DELETE FROM email_verification_tokens WHERE token = ?')
+      .bind(token)
+      .run()
+  } catch (error) {
+    console.error('Error deleting verification token:', error)
+    throw error
+  }
+}
+
 // ─── Helper Functions ─────────────────────────────────────────────────────
 
 /**
