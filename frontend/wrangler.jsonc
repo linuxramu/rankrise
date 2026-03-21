@@ -1,6 +1,11 @@
 {
   "name": "rankrise-frontend",
   "pages_build_output_dir": "dist",
+  "build": {
+    "command": "npm install && npm run build",
+    "cwd": null,
+    "root": "."
+  },
   "env": {
     "production": {
       "name": "rankrise-frontend-production"

@@ -3,6 +3,10 @@
   "main": "worker.ts",
   "compatibility_date": "2025-09-27",
   "compatibility_flags": ["nodejs_compat"],
+  "build": {
+    "command": "npm install && npm run build",
+    "cwd": null
+  },
   "observability": {
     "enabled": true
   },
@@ -14,7 +18,13 @@
     }
   ],
   "vars": {
-    "JWT_SECRET": "dev-secret-key-change-in-production",
-    "ENVIRONMENT": "development"
+    "ENVIRONMENT": "production"
+  },
+  "env": {
+    "production": {
+      "vars": {
+        "ENVIRONMENT": "production"
+      }
+    }
   }
 }
